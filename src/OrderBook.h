@@ -1,38 +1,38 @@
 #pragma once
-#include "OrderBookEntry.h"
-#include "CSVReader.h"
+
 #include <string>
 #include <vector>
+#include "OrderBookEntry.h"
+#include "CSVReader.h"
 
-class OrderBook
-{
-    public:
+using std::string;
+using std::vector;
+
+class OrderBook {
+public:
     /** construct, reading a csv data file */
-        OrderBook(std::string filename);
+    OrderBook(string filename);
+
     /** return vector of all know products in the dataset*/
-        std::vector<std::string> getKnownProducts();
+    vector<string> getKnownProducts();
+
     /** return vector of Orders according to the sent filters*/
-        std::vector<OrderBookEntry> getOrders(OrderBookType type, 
-                                              std::string product, 
-                                              std::string timestamp);
+    vector<double> getOrderPrices(OrderBookType type, const string& product, const string& timestamp);
+    vector<double> getOrderMinPricesBefore(OrderBookType type, const string& product, const string& timestamp);
+    vector<double> getOrderMaxPricesBefore(OrderBookType type, const string& product, const string& timestamp);
+    vector<double> getOrderPricesForLastTimesteps(OrderBookType type, const string& product, const string& timestamp, unsigned int timesteps);
 
-        /** returns the earliest time in the orderbook*/
-        std::string getEarliestTime();
-        /** returns the next time after the 
-         * sent time in the orderbook  
-         * If there is no next timestamp, wraps around to the start
-         * */
-        std::string getNextTime(std::string timestamp);
+    /** returns the earliest time in the orderbook*/
+    string getEarliestTime();
 
-        void insertOrder(OrderBookEntry& order);
+    /** returns the next time after the
+     * sent time in the orderbook
+     * If there is no next timestamp, wraps around to the start
+     * */
+    string getNextTime(string timestamp);
 
-        std::vector<OrderBookEntry> matchAsksToBids(std::string product, std::string timestamp);
-
-        static double getHighPrice(std::vector<OrderBookEntry>& orders);
-        static double getLowPrice(std::vector<OrderBookEntry>& orders);
-
-    private:
-        std::vector<OrderBookEntry> orders;
+private:
+    vector<OrderBookEntry> orders;
 
 
 };

@@ -1,7 +1,6 @@
 #include "AdvisorbotMain.h"
 
-int main()
-{   
+int main() {
     AdvisorbotMain app{};
     app.init();
 }
