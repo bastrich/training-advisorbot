@@ -1,22 +1,24 @@
 #include "OrderBookEntry.h"
 
+#include <utility>
+
 using std::string;
 
-OrderBookEntry::OrderBookEntry(double _price,
-                               double _amount,
-                               string _timestamp,
-                               string _product,
-                               OrderBookType _orderType,
-                               string _username)
-        : price(_price),
-          amount(_amount),
-          timestamp(_timestamp),
-          product(_product),
-          orderType(_orderType),
-          username(_username) {
+OrderBookEntry::OrderBookEntry(double price,
+                               double amount,
+                               string timestamp,
+                               string product,
+                               OrderBookType orderType,
+                               string username)
+        : price(price),
+          amount(amount),
+          timestamp(std::move(timestamp)),
+          product(std::move(product)),
+          orderType(orderType),
+          username(std::move(username)) {
 }
 
-OrderBookType OrderBookEntry::stringToOrderBookType(string s) {
+OrderBookType OrderBookEntry::stringToOrderBookType(const string& s) {
     if (s == "ask") {
         return OrderBookType::ask;
     }

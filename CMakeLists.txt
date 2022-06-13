@@ -17,4 +17,6 @@ add_executable(merklerex_end_topic_5
         src/OrderBookEntry.h
         src/Calculations.cpp
         src/Calculations.h
+        src/Utils.cpp
+        src/Utils.h
         )

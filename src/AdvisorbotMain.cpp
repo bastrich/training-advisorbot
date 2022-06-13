@@ -4,22 +4,24 @@
 #include "AdvisorbotMain.h"
 #include "OrderBookEntry.h"
 #include "Calculations.h"
+#include "Utils.h"
 
 using std::string;
 using std::to_string;
 using std::exception;
 using std::stoi;
 
-AdvisorbotMain::AdvisorbotMain() {
-
-}
+AdvisorbotMain::AdvisorbotMain() = default;
 
 void AdvisorbotMain::init() {
+    //init the 1st timestep
     currentTime = orderBook.getEarliestTime();
 
+    //cache parsed products
     vector<string> knownProducts = orderBook.getKnownProducts();
     availableProducts.insert(knownProducts.begin(), knownProducts.end());
 
+    //start input-output loop
     string input;
     while (true) {
         printWelcomeMessage();
@@ -29,16 +31,17 @@ void AdvisorbotMain::init() {
 }
 
 /**
- * Prints welcome message
+ * Print welcome message
  */
 void AdvisorbotMain::printWelcomeMessage() {
     printAdvisorbotOutput("Please enter a command, or 'help' for a list of commands");
 }
 
 /**
- * Reads and returns user input as string
+ * Read and return user input as a string
  */
 string AdvisorbotMain::readUserInput() {
+    //apply color style to user input cursor
     std::cout << "\033[1;34muser> \033[0m";
     string input;
     std::getline(std::cin, input);
@@ -46,16 +49,18 @@ string AdvisorbotMain::readUserInput() {
 }
 
 /**
- * Parses and processes user input
+ * Parse and process user input
  */
-void AdvisorbotMain::processUserInput(string input) {
-    vector<string> tokens = tokeniseUserInput(input);
+void AdvisorbotMain::processUserInput(const string &input) {
+    //get abd verify command tokens
+    vector<string> tokens = Utils::tokenize(input, ' ');
 
     if (tokens.empty()) {
         printAdvisorbotOutput("You typed nothing");
         return;
     }
 
+    //find command processor
     string command = tokens[0];
     command_processing_method commandProcessingMethod = commandProcessingMethodsMap[command];
     if (commandProcessingMethod == nullptr) {
@@ -63,28 +68,15 @@ void AdvisorbotMain::processUserInput(string input) {
         return;
     }
 
+    //call command processor
     ((*this).*(commandProcessingMethod))(tokens);
 }
 
-vector<string> AdvisorbotMain::tokeniseUserInput(string input) {
-    char separator = ' ';
-    vector<string> tokens;
-    signed int start, end;
-    string token;
-    start = input.find_first_not_of(separator, 0);
-    do {
-        end = input.find_first_of(separator, start);
-        if (start == input.length() || start == end) break;
-        if (end >= 0) token = input.substr(start, end - start);
-        else token = input.substr(start, input.length() - start);
-        tokens.push_back(token);
-        start = end + 1;
-    } while (end > 0);
-
-    return tokens;
-}
-
-void AdvisorbotMain::processCommand_help(const vector<string>& tokens) {
+/**
+ * Process 'help' command
+ */
+void AdvisorbotMain::processCommand_help(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() == 1) {
         printAdvisorbotOutput("The available commands are "
                               "\n * help - list all available commands"
@@ -114,7 +106,11 @@ void AdvisorbotMain::processCommand_help(const vector<string>& tokens) {
     printAdvisorbotOutput("Invalid syntax for 'help' command, check 'help help'");
 }
 
-void AdvisorbotMain::processCommand_prod(const vector<string>& tokens) {
+/**
+ * Process 'prod' command
+ */
+void AdvisorbotMain::processCommand_prod(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() > 1) {
         printAdvisorbotOutput("Invalid syntax for 'prod' command, check 'help prod'");
     }
@@ -127,17 +123,23 @@ void AdvisorbotMain::processCommand_prod(const vector<string>& tokens) {
     printAdvisorbotOutput(products);
 }
 
-void AdvisorbotMain::processCommand_min(const vector<string>& tokens) {
+/**
+ * Process 'min' command
+ */
+void AdvisorbotMain::processCommand_min(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 3) {
         printAdvisorbotOutput("Invalid syntax for 'min' command, check 'help min'");
     }
 
+    //parse and verify product
     string product = tokens[1];
     if (availableProducts.find(product) == availableProducts.end()) {
         printAdvisorbotOutput("Product '" + product + "' doesn't exist");
         return;
     }
 
+    //parse and verify order type
     OrderBookType orderBookType = OrderBookEntry::stringToOrderBookType(tokens[2]);
     if (orderBookType == OrderBookType::unknown) {
         printAdvisorbotOutput("Order book type provided is unknown, should be 'ask' or 'bid'");
@@ -154,17 +156,23 @@ void AdvisorbotMain::processCommand_min(const vector<string>& tokens) {
                           " is " + to_string(Calculations::min(prices)));
 }
 
-void AdvisorbotMain::processCommand_max(const vector<string>& tokens) {
+/**
+ * Process 'max' command
+ */
+void AdvisorbotMain::processCommand_max(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 3) {
         printAdvisorbotOutput("Invalid syntax for 'max' command, check 'help max'");
     }
 
+    //parse and verify product
     string product = tokens[1];
     if (availableProducts.find(product) == availableProducts.end()) {
         printAdvisorbotOutput("Product '" + product + "' doesn't exist");
         return;
     }
 
+    //parse and verify order type
     OrderBookType orderBookType = OrderBookEntry::stringToOrderBookType(tokens[2]);
     if (orderBookType == OrderBookType::unknown) {
         printAdvisorbotOutput("Order book type provided is unknown, should be 'ask' or 'bid'");
@@ -181,23 +189,30 @@ void AdvisorbotMain::processCommand_max(const vector<string>& tokens) {
                           " is " + to_string(Calculations::max(prices)));
 }
 
-void AdvisorbotMain::processCommand_avg(const vector<string>& tokens) {
+/**
+ * Process 'avg' command
+ */
+void AdvisorbotMain::processCommand_avg(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 4) {
         printAdvisorbotOutput("Invalid syntax for 'avg' command, check 'help avg'");
     }
 
+    //parse and verify product
     string product = tokens[1];
     if (availableProducts.find(product) == availableProducts.end()) {
         printAdvisorbotOutput("Product '" + product + "' doesn't exist");
         return;
     }
 
+    //parse and verify order type
     OrderBookType orderBookType = OrderBookEntry::stringToOrderBookType(tokens[2]);
     if (orderBookType == OrderBookType::unknown) {
         printAdvisorbotOutput("Order book type provided is unknown, should be 'ask' or 'bid'");
         return;
     }
 
+    //parse and verify number of timesteps
     unsigned int timesteps;
     try {
         timesteps = stoi(tokens[3]);
@@ -207,7 +222,7 @@ void AdvisorbotMain::processCommand_avg(const vector<string>& tokens) {
     }
 
     vector<double> prices = orderBook.getOrderPricesForLastTimesteps(orderBookType, product, currentTime,
-                                                                        timesteps);
+                                                                     timesteps);
     if (prices.empty()) {
         printAdvisorbotOutput("There are no orders for the given product and order type");
         return;
@@ -218,23 +233,30 @@ void AdvisorbotMain::processCommand_avg(const vector<string>& tokens) {
                           to_string(timesteps) + " timesteps was " + to_string(Calculations::avg(prices)));
 }
 
-void AdvisorbotMain::processCommand_predict(const vector<string>& tokens) {
+/**
+ * Process 'predict' command
+ */
+void AdvisorbotMain::processCommand_predict(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 4) {
         printAdvisorbotOutput("Invalid syntax for 'max' command, check 'help predict'");
     }
 
+    //parse and verify prediction type - min or max
     string minOrMax = tokens[1];
     if (minOrMax != "min" && minOrMax != "max") {
         printAdvisorbotOutput("The 1st parameter should 'min' or 'max', check 'help predict'");
         return;
     }
 
+    //parse and verify product
     string product = tokens[2];
     if (availableProducts.find(product) == availableProducts.end()) {
         printAdvisorbotOutput("Product '" + product + "' doesn't exist");
         return;
     }
 
+    //parse and verify order type
     OrderBookType orderBookType = OrderBookEntry::stringToOrderBookType(tokens[3]);
     if (orderBookType == OrderBookType::unknown) {
         printAdvisorbotOutput("Order book type provided is unknown, should be 'ask' or 'bid'");
@@ -256,8 +278,11 @@ void AdvisorbotMain::processCommand_predict(const vector<string>& tokens) {
                           " is " + to_string(Calculations::predict(prices)));
 }
 
-
-void AdvisorbotMain::processCommand_time(const vector<string>& tokens) {
+/**
+ * Process 'time' command
+ */
+void AdvisorbotMain::processCommand_time(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 1) {
         printAdvisorbotOutput("Invalid syntax for 'time' command, check 'help time'");
     }
@@ -265,7 +290,11 @@ void AdvisorbotMain::processCommand_time(const vector<string>& tokens) {
     printAdvisorbotOutput(currentTime);
 }
 
-void AdvisorbotMain::processCommand_step(const vector<string>& tokens) {
+/**
+ * Process 'step' command
+ */
+void AdvisorbotMain::processCommand_step(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 1) {
         printAdvisorbotOutput("Invalid syntax for 'step' command, check 'help step'");
     }
@@ -275,23 +304,30 @@ void AdvisorbotMain::processCommand_step(const vector<string>& tokens) {
     printAdvisorbotOutput("now at " + currentTime);
 }
 
-void AdvisorbotMain::processCommand_percentile(const vector<string>& tokens) {
+/**
+ * Process 'percentile' command
+ */
+void AdvisorbotMain::processCommand_percentile(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 5) {
         printAdvisorbotOutput("Invalid syntax for 'percentile' command, check 'help percentile'");
     }
 
+    //parse and verify product
     string product = tokens[1];
     if (availableProducts.find(product) == availableProducts.end()) {
         printAdvisorbotOutput("Product '" + product + "' doesn't exist");
         return;
     }
 
+    //parse and verify order type
     OrderBookType orderBookType = OrderBookEntry::stringToOrderBookType(tokens[2]);
     if (orderBookType == OrderBookType::unknown) {
         printAdvisorbotOutput("Order book type provided is unknown, should be 'ask' or 'bid'");
         return;
     }
 
+    //parse and verify number of timesteps
     unsigned int timesteps;
     try {
         timesteps = stoi(tokens[3]);
@@ -300,6 +336,7 @@ void AdvisorbotMain::processCommand_percentile(const vector<string>& tokens) {
         return;
     }
 
+    //parse and verify percentile value
     unsigned int percentile;
     try {
         percentile = stoi(tokens[4]);
@@ -312,7 +349,7 @@ void AdvisorbotMain::processCommand_percentile(const vector<string>& tokens) {
     }
 
     vector<double> prices = orderBook.getOrderPricesForLastTimesteps(orderBookType, product, currentTime,
-                                                                        timesteps);
+                                                                     timesteps);
     if (prices.empty()) {
         printAdvisorbotOutput("There are no orders for the given product and order type");
         return;
@@ -324,7 +361,11 @@ void AdvisorbotMain::processCommand_percentile(const vector<string>& tokens) {
             to_string(timesteps) + " timesteps was " + to_string(Calculations::nthPercentile(prices, percentile)));
 }
 
-void AdvisorbotMain::processCommand_exit(const vector<string>& tokens) {
+/**
+ * Process 'exit' command
+ */
+void AdvisorbotMain::processCommand_exit(const vector<string> &tokens) {
+    //verify amount of tokens
     if (tokens.size() != 1) {
         printAdvisorbotOutput("Invalid syntax for 'exit' command, check 'help exit'");
     }
@@ -333,6 +374,10 @@ void AdvisorbotMain::processCommand_exit(const vector<string>& tokens) {
     std::exit(0);
 }
 
-void AdvisorbotMain::printAdvisorbotOutput(const string& message) {
+/**
+ * Print output
+ */
+void AdvisorbotMain::printAdvisorbotOutput(const string &message) {
+    //apply color style to advisorbot output cursor
     std::cout << "\033[1;31madvisorbot>\033[0m " << message << std::endl;
 }

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "OrderBookEntry.h"
 #include <vector>
 #include <string>
+#include "OrderBookEntry.h"
 
 using std::string;
 using std::vector;
@@ -10,8 +10,12 @@ using std::vector;
 class CSVReader {
 public:
     CSVReader();
-    static vector<OrderBookEntry> readCSV(string csvFile);
+
+    /**
+     * Read and parse CSV from the file provided
+     */
+    static vector<OrderBookEntry> readCSV(const string &csvFile);
+
 private:
-    static vector<std::string> tokenise(string csvLine, char separator);
-    static OrderBookEntry stringsToOBE(vector<string> strings);
+    static OrderBookEntry stringsToOBE(const vector<string>& strings);
 };

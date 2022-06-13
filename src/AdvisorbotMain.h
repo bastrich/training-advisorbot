@@ -14,47 +14,56 @@ class AdvisorbotMain {
 public:
     AdvisorbotMain();
 
-    /** Call this to start the sim */
+    /**
+     * Init the app
+     */
     void init();
 
 private:
-    typedef void (AdvisorbotMain::*command_processing_method)(const vector<string>&);
+    /**
+     * Type definition of a command processing method
+     */
+    typedef void (AdvisorbotMain::*command_processing_method)(const vector<string> &);
 
+    /**
+     * Type definition of the map <command-nam> -> <processing-method>
+     */
     typedef map<string, command_processing_method> command_processing_methods_map;
 
     void printWelcomeMessage();
 
     string readUserInput();
 
-    void processUserInput(string input);
+    void processUserInput(const string &input);
 
-    vector<string> tokeniseUserInput(string input);
+    void processCommand_help(const vector<string> &tokens);
 
-    void processCommand_help(const vector<string>&tokens);
+    void processCommand_prod(const vector<string> &tokens);
 
-    void processCommand_prod(const vector<string>& tokens);
+    void processCommand_min(const vector<string> &tokens);
 
-    void processCommand_min(const vector<string>& tokens);
+    void processCommand_max(const vector<string> &tokens);
 
-    void processCommand_max(const vector<string>& tokens);
+    void processCommand_avg(const vector<string> &tokens);
 
-    void processCommand_avg(const vector<string>& tokens);
+    void processCommand_predict(const vector<string> &tokens);
 
-    void processCommand_predict(const vector<string>& tokens);
+    void processCommand_time(const vector<string> &tokens);
 
-    void processCommand_time(const vector<string>& tokens);
+    void processCommand_step(const vector<string> &tokens);
 
-    void processCommand_step(const vector<string>& tokens);
+    void processCommand_percentile(const vector<string> &tokens);
 
-    void processCommand_percentile(const vector<string>& tokens);
+    void processCommand_exit(const vector<string> &tokens);
 
-    void processCommand_exit(const vector<string>& tokens);
-
-    static void printAdvisorbotOutput(const string& message);
+    static void printAdvisorbotOutput(const string &message);
 
     string currentTime;
     OrderBook orderBook{"20200601.csv"};
     std::set<string> availableProducts;
+    /**
+     * Map <command-name> -> <processing-method>
+     */
     command_processing_methods_map commandProcessingMethodsMap = {
             {"help",       &AdvisorbotMain::processCommand_help},
             {"prod",       &AdvisorbotMain::processCommand_prod},
@@ -67,6 +76,9 @@ private:
             {"percentile", &AdvisorbotMain::processCommand_percentile},
             {"exit",       &AdvisorbotMain::processCommand_exit}
     };
+    /**
+     * Map <command-name> -> <help-output>
+     */
     map<string, string> commandHelpMap = {
             {"help",       " help -> List all available commands\n"
                            " help <cmd> -> Output help for the specified command"},

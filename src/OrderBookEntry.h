@@ -4,41 +4,32 @@
 
 using std::string;
 
-enum class OrderBookType{bid, ask, unknown};
+enum class OrderBookType {
+    bid, ask, unknown
+};
 
-class OrderBookEntry
-{
-    public:
-    
+class OrderBookEntry {
+public:
+    OrderBookEntry(double _price,
+                   double _amount,
+                   string _timestamp,
+                   string _product,
+                   OrderBookType _orderType,
+                   string username = "dataset");
+    /**
+     * Create an object from the string provided
+     */
+    static OrderBookType stringToOrderBookType(const string& s);
 
-        OrderBookEntry( double _price, 
-                        double _amount, 
-                        string _timestamp, 
-                        string _product, 
-                        OrderBookType _orderType, 
-                        string username = "dataset");
+    /**
+     * Return string representation of @class OrderBookType
+     */
+    static string orderBookTypeToString(OrderBookType orderBookType);
 
-        static OrderBookType stringToOrderBookType(string s);
-
-        static bool compareByTimestamp(OrderBookEntry& e1, OrderBookEntry& e2)
-        {
-            return e1.timestamp < e2.timestamp;
-        }  
-        static bool compareByPriceAsc(OrderBookEntry& e1, OrderBookEntry& e2)
-        {
-            return e1.price < e2.price;
-        }
-         static bool compareByPriceDesc(OrderBookEntry& e1, OrderBookEntry& e2)
-        {
-            return e1.price > e2.price;
-        }
-
-        static string orderBookTypeToString(OrderBookType);
-
-        double price;
-        double amount;
-        string timestamp;
-        string product;
-        OrderBookType orderType;
-        string username;
+    double price;
+    double amount;
+    string timestamp;
+    string product;
+    OrderBookType orderType;
+    string username;
 };

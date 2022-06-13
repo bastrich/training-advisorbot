@@ -8,12 +8,10 @@ using std::string;
 using std::set;
 using std::vector;
 
-/** construct, reading a csv data file */
-OrderBook::OrderBook(string filename) {
+OrderBook::OrderBook(const string &filename) {
     orders = CSVReader::readCSV(filename);
 }
 
-/** return vector of all know products in the dataset*/
 vector<string> OrderBook::getKnownProducts() {
     vector<string> products;
 
@@ -31,8 +29,7 @@ vector<string> OrderBook::getKnownProducts() {
     return products;
 }
 
-/** return vector of Orders according to the sent filters*/
-vector<double> OrderBook::getOrderPrices(OrderBookType type, const string& product, const string& timestamp) {
+vector<double> OrderBook::getOrderPrices(OrderBookType type, const string &product, const string &timestamp) {
     vector<double> prices;
     for (OrderBookEntry &e: orders) {
         if (e.orderType == type &&
@@ -44,11 +41,10 @@ vector<double> OrderBook::getOrderPrices(OrderBookType type, const string& produ
     return prices;
 }
 
-/** return vector of Orders according to the sent filters*/
 vector<double> OrderBook::getOrderPricesForLastTimesteps(OrderBookType type,
-                                                            const string& product,
-                                                            const string& timestamp,
-                                                            unsigned int timesteps) {
+                                                         const string &product,
+                                                         const string &timestamp,
+                                                         unsigned int timesteps) {
     vector<double> prices;
     string lastPreviousTimestamp;
     int lastPreviousTimestampUpdateCount = 1;
@@ -100,7 +96,7 @@ string OrderBook::getNextTime(string timestamp) {
     return next_timestamp;
 }
 
-vector<double> OrderBook::getOrderMinPricesBefore(OrderBookType type, const string& product, const string& timestamp) {
+vector<double> OrderBook::getOrderMinPricesBefore(OrderBookType type, const string &product, const string &timestamp) {
     vector<double> prices;
 
     string currentTimestamp;
@@ -131,7 +127,7 @@ vector<double> OrderBook::getOrderMinPricesBefore(OrderBookType type, const stri
     return prices;
 }
 
-vector<double> OrderBook::getOrderMaxPricesBefore(OrderBookType type, const string& product, const string& timestamp) {
+vector<double> OrderBook::getOrderMaxPricesBefore(OrderBookType type, const string &product, const string &timestamp) {
     vector<double> prices;
 
     string currentTimestamp;
